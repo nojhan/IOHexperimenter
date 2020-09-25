@@ -385,12 +385,12 @@ void IOHprofiler_csv_logger<T>::set_dynamic_attributes(const std::vector<std::st
 template<class T>
 void IOHprofiler_csv_logger<T>::do_log(const std::vector<double> & log_info) {
   this->write_line( (size_t)(log_info[0]),log_info[1],log_info[2],log_info[3],log_info[4]);
-};
+}
 
 template<class T>
 void IOHprofiler_csv_logger<T>::write_line(const std::vector<double> & log_info) {
   this->write_line( (size_t)(log_info[0]),log_info[1],log_info[2],log_info[3],log_info[4]);
-};
+}
 
 /// \todo The precision of double values.
 template<class T>
