@@ -103,6 +103,8 @@ class IOHprofiler_ExternPythonProblem : public IOHprofiler_problem<InputType>
     protected:
         // This is a lot of boiler plate, but it's better to be eplicit.
 
+        IOHprofiler_ExternPythonHelper<InputType> py;
+
         std::string _api_objfunc;
         PyObject* _py_objfunc;
 
@@ -134,8 +136,6 @@ class IOHprofiler_ExternPythonProblem : public IOHprofiler_problem<InputType>
         PyObject* _py_number_of_objectives_get;
 
         const InputType _return_on_error;
-
-        IOHprofiler_ExternPythonHelper<InputType> py;
 };
 
 #include "IOHprofiler_extern_python.hpp"
