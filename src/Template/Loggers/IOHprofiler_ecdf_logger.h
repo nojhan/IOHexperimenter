@@ -236,13 +236,6 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
 
         /** @} */
 
-    private:
-        //! Default range for errors is logarithmic.
-        IOHprofiler_RangeLog<double> _default_range_error;
-
-        //! Default range for evaluations is logarithmic.
-        IOHprofiler_RangeLog<size_t> _default_range_evals;
-
     protected:
         /** Internal members  @{ */
 
