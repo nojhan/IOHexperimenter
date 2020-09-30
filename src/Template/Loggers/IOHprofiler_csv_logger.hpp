@@ -79,7 +79,11 @@ int IOHprofiler_csv_logger<T>::openIndex() {
   return IOHprofiler_create_folder(experiment_folder_name);
 }
 
-// FIXME this can be far more robust using c++17's filesystem::create_directory
+
+#ifndef __cpp_lib_filesystem
+
+// Known bug: this crashes with nested paths.
+// This can be far more robust using c++17's filesystem::create_directories
 template<class T>
 bool IOHprofiler_csv_logger<T>::IOHprofiler_create_folder(std::string folder_name) { 
 #if defined(_WIN32) || defined(_WIN64) || defined(__MINGW64__) || defined(__CYGWIN__)  
@@ -97,6 +101,17 @@ bool IOHprofiler_csv_logger<T>::IOHprofiler_create_folder(std::string folder_nam
     return false;
   }
 }
+
+#else
+
+// C++17 version
+#include <filesystem>
+template<class T>
+bool IOHprofiler_csv_logger<T>::IOHprofiler_create_folder(std::string folder_name) { 
+    return std::filesystem::create_directories(folder_name);
+}
+
+#endif
 
 template<class T>
 std::string IOHprofiler_csv_logger<T>::IOHprofiler_experiment_folder_name() {
