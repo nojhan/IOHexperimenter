@@ -80,10 +80,10 @@ std::ostream& operator<<(std::ostream& out, const IOHprofiler_AttainMat& mat)
 
 /***** IOHprofiler_ecdf_logger *****/
 
-template<class T>
-IOHprofiler_ecdf_logger<T>::IOHprofiler_ecdf_logger(
-        const double error_min, const double error_max, const size_t error_buckets,
-        const size_t evals_min, const size_t evals_max, const size_t evals_buckets
+template<class T, class TARGET, class EVALS>
+IOHprofiler_ecdf_logger<T,TARGET,EVALS>::IOHprofiler_ecdf_logger(
+        const TARGET error_min, const TARGET error_max, const size_t error_buckets,
+        const EVALS  evals_min, const EVALS  evals_max, const size_t evals_buckets
     ) :
         _default_range_error(error_min, error_max, error_buckets),
         _default_range_evals(evals_min, evals_max, evals_buckets),
@@ -94,10 +94,10 @@ IOHprofiler_ecdf_logger<T>::IOHprofiler_ecdf_logger(
                 0))
 { }
 
-template<class T>
-IOHprofiler_ecdf_logger<T>::IOHprofiler_ecdf_logger(
-        IOHprofiler_Range<double>& error_buckets,
-        IOHprofiler_Range<size_t>& evals_buckets
+template<class T, class TARGET, class EVALS>
+IOHprofiler_ecdf_logger<T,TARGET,EVALS>::IOHprofiler_ecdf_logger(
+        IOHprofiler_Range<TARGET>& error_buckets,
+        IOHprofiler_Range<EVALS>& evals_buckets
     ) :
         _default_range_error(0,1,1),
         _default_range_evals(0,1,1),
@@ -108,20 +108,20 @@ IOHprofiler_ecdf_logger<T>::IOHprofiler_ecdf_logger(
                 0))
 { }
 
-template<class T>
-void IOHprofiler_ecdf_logger<T>::activate_logger()
+template<class T, class TARGET, class EVALS>
+void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::activate_logger()
 {
     // pass
 }
 
-template<class T>
-void IOHprofiler_ecdf_logger<T>::track_suite(const IOHprofiler_suite<T>&)
+template<class T, class TARGET, class EVALS>
+void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::track_suite(const IOHprofiler_suite<T>&)
 {
     reset();
 }
 
-template<class T>
-void IOHprofiler_ecdf_logger<T>::track_problem(const IOHprofiler_problem<T> & pb)
+template<class T, class TARGET, class EVALS>
+void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::track_problem(const IOHprofiler_problem<T> & pb)
 {
     _current.pb     = pb.IOHprofiler_get_problem_id();
     _current.dim    = pb.IOHprofiler_get_number_of_variables();
@@ -133,8 +133,8 @@ void IOHprofiler_ecdf_logger<T>::track_problem(const IOHprofiler_problem<T> & pb
     init_ecdf(_current);
 }
 
-template<class T>
-void IOHprofiler_ecdf_logger<T>::do_log(const std::vector<double>& infos)
+template<class T, class TARGET, class EVALS>
+void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::do_log(const std::vector<double>& infos)
 {
     /* loggerInfo:
      *   evaluations,
@@ -179,14 +179,14 @@ void IOHprofiler_ecdf_logger<T>::do_log(const std::vector<double>& infos)
     }
 }
 
-template<class T>
-const IOHprofiler_AttainSuite& IOHprofiler_ecdf_logger<T>::data()
+template<class T, class TARGET, class EVALS>
+const IOHprofiler_AttainSuite& IOHprofiler_ecdf_logger<T,TARGET,EVALS>::data()
 {
     return _ecdf_suite;
 }
 
-template<class T>
-const IOHprofiler_AttainMat& IOHprofiler_ecdf_logger<T>::at(size_t problem_id, size_t instance_id, size_t dim_id) const
+template<class T, class TARGET, class EVALS>
+const IOHprofiler_AttainMat& IOHprofiler_ecdf_logger<T,TARGET,EVALS>::at(size_t problem_id, size_t instance_id, size_t dim_id) const
 {
     assert(_ecdf_suite.count(problem_id) != 0);
     assert(_ecdf_suite.at(problem_id).count(dim_id) != 0);
@@ -194,8 +194,8 @@ const IOHprofiler_AttainMat& IOHprofiler_ecdf_logger<T>::at(size_t problem_id, s
     return _ecdf_suite.at(problem_id).at(dim_id).at(instance_id);
 }
 
-template<class T>
-std::tuple<size_t, size_t, size_t> IOHprofiler_ecdf_logger<T>::size()
+template<class T, class TARGET, class EVALS>
+std::tuple<size_t, size_t, size_t> IOHprofiler_ecdf_logger<T,TARGET,EVALS>::size()
 {
     return std::make_tuple(
         _ecdf_suite.size(), // problems
@@ -204,25 +204,25 @@ std::tuple<size_t, size_t, size_t> IOHprofiler_ecdf_logger<T>::size()
         );
 }
 
-template<class T>
-IOHprofiler_Range<double> IOHprofiler_ecdf_logger<T>::error_range()
+template<class T, class TARGET, class EVALS>
+IOHprofiler_Range<TARGET> IOHprofiler_ecdf_logger<T,TARGET,EVALS>::error_range()
 {
     return _range_error;
 }
 
-template<class T>
-IOHprofiler_Range<size_t> IOHprofiler_ecdf_logger<T>::eval_range() {
+template<class T, class TARGET, class EVALS>
+IOHprofiler_Range<EVALS> IOHprofiler_ecdf_logger<T,TARGET,EVALS>::eval_range() {
     return _range_evals;
 }
 
-template<class T>
-void IOHprofiler_ecdf_logger<T>::reset()
+template<class T, class TARGET, class EVALS>
+void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::reset()
 {
     _ecdf_suite.clear();
 }
 
-template<class T>
-void IOHprofiler_ecdf_logger<T>::init_ecdf( const Problem& cur )
+template<class T, class TARGET, class EVALS>
+void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::init_ecdf( const Problem& cur )
 {
     if(_ecdf_suite.count(cur.pb) == 0) {
         _ecdf_suite[cur.pb] = std::map< size_t, std::map< size_t, IOHprofiler_AttainMat >>();
@@ -236,8 +236,8 @@ void IOHprofiler_ecdf_logger<T>::init_ecdf( const Problem& cur )
     assert(_ecdf_suite.at(cur.pb).at(cur.dim).at(cur.ins).at(0).at(0) == 0);
 }
 
-template<class T>
-IOHprofiler_AttainMat& IOHprofiler_ecdf_logger<T>::current_ecdf()
+template<class T, class TARGET, class EVALS>
+IOHprofiler_AttainMat& IOHprofiler_ecdf_logger<T,TARGET,EVALS>::current_ecdf()
 {
     assert(_ecdf_suite.count(_current.pb) != 0);
     assert(_ecdf_suite[_current.pb].count(_current.dim) != 0);
@@ -245,8 +245,8 @@ IOHprofiler_AttainMat& IOHprofiler_ecdf_logger<T>::current_ecdf()
     return _ecdf_suite[_current.pb][_current.dim][_current.ins];
 }
 
-template<class T>
-void IOHprofiler_ecdf_logger<T>::fill_up( size_t i_error, size_t j_evals)
+template<class T, class TARGET, class EVALS>
+void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::fill_up( size_t i_error, size_t j_evals)
 {
     IOHprofiler_AttainMat& mat = current_ecdf();
     size_t imax = _range_error.size();
@@ -276,18 +276,19 @@ void IOHprofiler_ecdf_logger<T>::fill_up( size_t i_error, size_t j_evals)
 size_t IOHprofiler_ecdf_sum::operator()(const IOHprofiler_AttainSuite& attainment)
 {
     unsigned long int sum = 0;
+    assert(attainment.size() > 0);
     for(const auto& pbid_dimmap : attainment ) {
+        assert(pbid_dimmap.second.size() > 0);
         for(const auto& dimid_insmap : pbid_dimmap.second ) {
+            assert(dimid_insmap.second.size() > 0);
             for(const auto& insid_mat : dimid_insmap.second) {
                 const IOHprofiler_AttainMat& mat = insid_mat.second;
+                assert(mat.size() > 0);
+                assert(mat[0].size() > 0);
                 for(const auto& row : mat) {
                     for(const auto& item : row ) {
                         sum += item;
-                    }
-                }
-            }
-        }
-    }
+    }   }   }   }   }
     return sum;
 }
 

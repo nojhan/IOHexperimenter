@@ -123,7 +123,7 @@ using IOHprofiler_AttainSuite =
     std::clog << logger.at(1,2,2) << std::endl;
  * @endcode
  */
-template<class T>
+template<class T, class TARGET=double, class EVALS=size_t>
 class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
 {
     protected:
@@ -147,8 +147,8 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
         /** Simple constructor that defaults to log-log scale.
          */
         IOHprofiler_ecdf_logger(
-                const double error_min, const double error_max, const size_t error_buckets,
-                const size_t evals_min, const size_t evals_max, const size_t evals_buckets
+                const TARGET error_min, const TARGET error_max, const size_t error_buckets,
+                const EVALS  evals_min, const EVALS  evals_max, const size_t evals_buckets
             );
 
         /** Complete constructor, with which you can define linear or semi-log scale.
@@ -156,8 +156,8 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
          * @see IOHprofiler_RangeLinear
          */
         IOHprofiler_ecdf_logger(
-                IOHprofiler_Range<double>& error_buckets,
-                IOHprofiler_Range<size_t>& evals_buckets
+                IOHprofiler_Range<TARGET>& error_buckets,
+                IOHprofiler_Range<EVALS>& evals_buckets
             );
 
     public:
@@ -208,10 +208,10 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
         std::tuple<size_t, size_t, size_t> size();
 
         /** Accessor to the range used for error targets in this logger instance. */
-        IOHprofiler_Range<double> error_range();
+        IOHprofiler_Range<TARGET> error_range();
 
         /** Accessor to the range used for evaluations targets in this logger instance. */
-        IOHprofiler_Range<size_t> eval_range();
+        IOHprofiler_Range<EVALS> eval_range();
 
         /** @} */
 
@@ -239,10 +239,10 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
         /** Internal members  @{ */
 
         //! Range for the errors axis.
-        IOHprofiler_Range<double>& _range_error;
+        IOHprofiler_Range<TARGET>& _range_error;
 
         //! Range for the evaluations axis.
-        IOHprofiler_Range<size_t>& _range_evals;
+        IOHprofiler_Range<EVALS>& _range_evals;
 
         //! Currently targeted problem metadata.
         Problem _current;
@@ -255,10 +255,10 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
 
     private:
         //! Default range for errors is logarithmic.
-        IOHprofiler_RangeLog<double> _default_range_error;
+        IOHprofiler_RangeLog<TARGET> _default_range_error;
 
         //! Default range for evaluations is logarithmic.
-        IOHprofiler_RangeLog<size_t> _default_range_evals;
+        IOHprofiler_RangeLog<EVALS> _default_range_evals;
 
         /** @} */
 };
@@ -280,7 +280,7 @@ class IOHprofiler_ecdf_stat
  *
  * @code
     IOHprofiler_ecdf_sum sum;
-    size_t s = sum(logger.get());
+    size_t s = sum(logger.data());
  * @endcode
  */
 class IOHprofiler_ecdf_sum : public IOHprofiler_ecdf_stat<size_t>
