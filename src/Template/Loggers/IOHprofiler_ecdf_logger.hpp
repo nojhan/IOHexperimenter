@@ -83,12 +83,14 @@ std::ostream& operator<<(std::ostream& out, const IOHprofiler_AttainMat& mat)
 template<class T, class TARGET, class EVALS>
 IOHprofiler_ecdf_logger<T,TARGET,EVALS>::IOHprofiler_ecdf_logger(
         const TARGET error_min, const TARGET error_max, const size_t error_buckets,
-        const EVALS  evals_min, const EVALS  evals_max, const size_t evals_buckets
+        const EVALS  evals_min, const EVALS  evals_max, const size_t evals_buckets,
+        const bool use_known_optimal
     ) :
         _default_range_error(error_min, error_max, error_buckets),
         _default_range_evals(evals_min, evals_max, evals_buckets),
         _range_error(_default_range_error),
         _range_evals(_default_range_evals),
+        _use_known_optimal(use_known_optimal),
         _empty( error_buckets,
             std::vector<bool>( evals_buckets,
                 0))
@@ -97,12 +99,14 @@ IOHprofiler_ecdf_logger<T,TARGET,EVALS>::IOHprofiler_ecdf_logger(
 template<class T, class TARGET, class EVALS>
 IOHprofiler_ecdf_logger<T,TARGET,EVALS>::IOHprofiler_ecdf_logger(
         IOHprofiler_Range<TARGET>& error_buckets,
-        IOHprofiler_Range<EVALS>& evals_buckets
+        IOHprofiler_Range<EVALS>& evals_buckets,
+        const bool use_known_optimal
     ) :
         _default_range_error(0,1,1),
         _default_range_evals(0,1,1),
         _range_error(error_buckets),
         _range_evals(evals_buckets),
+        _use_known_optimal(use_known_optimal),
         _empty( error_buckets.size(),
             std::vector<bool>( evals_buckets.size(),
                 0))
@@ -128,14 +132,15 @@ void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::track_problem(const IOHprofiler_pr
     _current.ins     = pb.IOHprofiler_get_instance_id();
     _current.maxmin  = pb.IOHprofiler_get_optimization_type();
     _current.has_opt = pb.IOHprofiler_has_optimal();
-    if(_current.has_opt) {
+    if(_use_known_optimal and _current.has_opt) {
         IOH_log("Problem has known optimal, will compute the ECDF of the error.");
         _current.opt    = pb.IOHprofiler_get_optimal();
-    } else {
+        // mono-objective only
+        assert(_current.opt.size() == 1);
+    } else if(_use_known_optimal) {
         IOH_log("Problem has no known optimal, will compute the absolute ECDF.");
-    }
-    // mono-objective only
-    assert(_current.opt.size() == 1);
+    } // else silent.
+
     init_ecdf(_current);
 }
 
@@ -153,7 +158,7 @@ void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::do_log(const std::vector<double>& 
     // TODO make a struct for loggerInfo?
     double evals = infos[0];
     double err;
-    if (_current.has_opt) {
+    if(_use_known_optimal and _current.has_opt) {
         err = std::abs(_current.opt[0] - infos[4]);
 
     } else {
@@ -262,7 +267,7 @@ void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::fill_up( size_t i_error, size_t j_
     IOHprofiler_AttainMat& mat = current_ecdf();
     size_t ibound = _range_error.size();
     size_t jbound = _range_evals.size();
-    if(_current.has_opt or _current.maxmin == IOH_optimization_type::Minimization) {
+    if((_use_known_optimal and _current.has_opt) or _current.maxmin == IOH_optimization_type::Minimization) {
         for(size_t i = i_error; i < ibound; i++) {
             // If we reach a 1 on first col of this row, no need to continue.
             if(mat[i][j_evals] == 1) {
@@ -281,7 +286,7 @@ void IOHprofiler_ecdf_logger<T,TARGET,EVALS>::fill_up( size_t i_error, size_t j_
             }
         } // for i
     } else {
-        assert(not _current.has_opt and _current.maxmin == IOH_optimization_type::Maximization);
+        assert(not (_use_known_optimal and _current.has_opt) and _current.maxmin == IOH_optimization_type::Maximization);
         for(size_t i = i_error; i >= 1; i--) {
             // If we reach a 1 on first col of this row, no need to continue.
             if(mat[i-1][j_evals] == 1) {

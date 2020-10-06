@@ -149,7 +149,8 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
          */
         IOHprofiler_ecdf_logger(
                 const TARGET error_min, const TARGET error_max, const size_t error_buckets,
-                const EVALS  evals_min, const EVALS  evals_max, const size_t evals_buckets
+                const EVALS  evals_min, const EVALS  evals_max, const size_t evals_buckets,
+                const bool use_known_optimal = true
             );
 
         /** Complete constructor, with which you can define linear or semi-log scale.
@@ -158,7 +159,8 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
          */
         IOHprofiler_ecdf_logger(
                 IOHprofiler_Range<TARGET>& error_buckets,
-                IOHprofiler_Range<EVALS>& evals_buckets
+                IOHprofiler_Range<EVALS>& evals_buckets,
+                const bool use_known_optimal = true
             );
 
     public:
@@ -253,6 +255,9 @@ class IOHprofiler_ecdf_logger : public IOHprofiler_observer<T>
 
         //! The whole main data structure.
         IOHprofiler_AttainSuite _ecdf_suite;
+
+        //! Use known optimal to compute target error instead of absolute values.
+        const bool _use_known_optimal;
 
     private:
         //! Default range for errors is logarithmic.
