@@ -328,3 +328,31 @@ inline size_t IOHprofiler_ecdf_sum::operator()(const IOHprofiler_AttainSuite& at
     return sum;
 }
 
+inline IOHprofiler_ecdf_aggregate::Mat IOHprofiler_ecdf_aggregate::operator()(const IOHprofiler_AttainSuite& attainment)
+{
+    assert(attainment.size() > 0);
+    const auto& a_pb0  = std::begin(attainment)->second;
+    assert(a_pb0.size() > 0);
+    const auto& a_dim0 = std::begin(a_pb0)->second;
+    assert(a_dim0.size() > 0);
+    const auto& a_ins0 = std::begin(a_dim0)->second;
+    assert(a_ins0.size() > 0);
+    Mat agg(a_ins0.size(), std::vector<size_t>(a_ins0.at(0).size(), 0));
+
+    for(const auto& pbid_dimmap : attainment ) {
+        assert(pbid_dimmap.second.size() > 0);
+        for(const auto& dimid_insmap : pbid_dimmap.second ) {
+            assert(dimid_insmap.second.size() > 0);
+            for(const auto& insid_mat : dimid_insmap.second) {
+                const IOHprofiler_AttainMat& mat = insid_mat.second;
+                assert(mat.size() > 0);
+                assert(mat[0].size() > 0);
+
+                assert(mat.size() == agg.size());
+                assert(mat[0].size() == agg[0].size());
+                for(size_t i = 0; i < mat.size(); ++i) {
+                    for(size_t j = 0; j < mat[0].size(); ++j) {
+                        agg[i][j] += mat[i][j];
+    }   }   }   }   }
+    return agg;
+}

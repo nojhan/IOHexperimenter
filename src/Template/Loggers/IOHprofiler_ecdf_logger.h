@@ -294,6 +294,21 @@ class IOHprofiler_ecdf_sum : public IOHprofiler_ecdf_stat<size_t>
         inline size_t operator()(const IOHprofiler_AttainSuite& attainment);
 };
 
+/** Computes the matrix that is the sum of all matrices in an AttainSuite.
+ *  Across problems, dimensions and instances.
+ *
+ * @code
+    IOHprofiler_ecdf_aggregate agg;
+    IOHprofiler_ecdf_aggregate::Mat a = agg(logger.data());
+ * @endcode
+ */
+class IOHprofiler_ecdf_aggregate : public IOHprofiler_ecdf_stat< std::vector<std::vector<size_t>> >
+{
+    public:
+        using Mat = std::vector< std::vector<size_t> >;
+        inline Mat operator()(const IOHprofiler_AttainSuite& attainment);
+};
+
 #include "IOHprofiler_ecdf_logger.hpp"
 
 #endif // _IOHPROFILER_ECDF_LOGGER_H_
